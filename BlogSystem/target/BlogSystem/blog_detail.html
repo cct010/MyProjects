@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客详情页</title>
+    <link rel="stylesheet" href="css/blog_detail.css">
+    <link rel="stylesheet" href="css/common.css">
+    <script src="js/jquery.min.js"></script>
+    <!-- 要保证editor.md在jquery后,因为editor.md依赖了jquery -->
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script> -->
+    <!-- 引入 editor.md 的依赖 -->
+    <link rel="stylesheet" href="editor.md/css/editormd.min.css" />
+    <script src="editor.md/lib/marked.min.js"></script>
+    <script src="editor.md/lib/prettify.min.js"></script>
+    <script src="editor.md/editormd.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="daohang">
+        <img src="./image/头像2.png" alt="头像">
+        <div class="spacer"></div>
+        <a href="blog_list.html">主页</a>
+        <a href="blog_edit.html">写博客</a>
+        <a href="logout">注销</a>
+    </div>
+    <!-- 页面主体 -->
+    <div class="container">
+        <!-- 左侧布局 -->
+        <div class="container-left">
+            <div class="card">
+                <img src="./image/头像.png" alt="头像">
+                <h2>TenjoUtena</h2>
+                <a href="">github</a>
+                <div class="counter">
+                    <span>文章</span>
+                    <span>分类</span>
+                </div>
+                <div class="counter">
+                    <span>2</span>
+                    <span>3</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧布局 -->
+        <div class="container-right">
+            <div class="title"></div>
+            <div class="date"></div>
+            <div id="content" class="content"></div>
+        </div>
+    </div>
+    <script>
+
+
+        $.ajax({
+            type:'get',
+            url:'blog' + location.search,
+            success: function(body) {
+                // 此处的body就是一个博客的js对象
+                // 更新标题
+                let titleDiv = document.querySelector('.container-right .title');
+                titleDiv.innerHTML = body.title;
+                // 更新日期
+                let postTimediv = document.querySelector('.container-right .date');
+                postTimediv.innerHTML = body.postTime;
+                // 更新博客正文
+                // 数据库中保存的是渲染前的正文,最终展示在页面上的应该是渲染后的内容
+                // 使用editor.md对markdown内容进行转化,使用editor.ma提供的editormd.markdownToHTML方法
+                // 它把markdown格式的字符串转成HTML输出到#content这个标签内部
+                editormd.markdownToHTML('content',{ markdown:body.content});
+            }
+
+        })
+
+        function checkLogin() {
+                $.ajax({
+                    type:'get',
+                    url:'login',
+                    success: function(body){
+                        if(body.userId && body.userId > 0) {
+                            // 登录成功
+                            console.log("当前用户已经登陆!");
+                        } else {
+                            // 未登录,强制跳转到登录页
+                            location.assign('login.html');
+                        }
+                    }
+                }); 
+            }
+            // 函数调用
+        checkLogin();
+        getAuthor();
+
+        function getAuthor() {
+            $.ajax({
+                type:'get',
+                url:'author' + location.search,
+                success: function(body) {
+                    // 把username设置到界面上
+                    let h2 = document.querySelector('.container-left .card h2');
+                    h2.innerHTML = body.username;
+
+                }
+            });
+        }
+    </script>
+</body>
+</html>

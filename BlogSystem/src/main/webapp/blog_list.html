@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客列表页</title>
+    <link rel="stylesheet" href="css/blog_list.css">
+    <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="daohang">
+        <img src="./image/头像2.png" alt="头像">
+        <div class="spacer"></div>
+        <a href="blog_list.html">主页</a>
+        <a href="blog_edit.html">写博客</a>
+        <a href="logout">注销</a>
+    </div>
+    <!-- 页面主体 -->
+    <div class="container">
+        <!-- 左侧布局 -->
+        <div class="container-left">
+            <div class="card">
+                <img src="./image/头像.png" alt="头像">
+                <h2>TenjoUtena</h2>
+                <a href="">github</a>
+                <div class="counter">
+                    <span>文章</span>
+                    <span>分类</span>
+                </div>
+                <div class="counter">
+                    <span>2</span>
+                    <span>3</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧布局 -->
+        <div class="container-right">
+            <!-- 在页面加载时,向服务器发起请求,获取博客列表数据 -->
+            
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script>
+        // 在页面加载时,向服务器发起请求,获取博客列表页面
+        function getBlogs() {
+            $.ajax({
+                type: 'get',
+                url: 'blog',
+                success: function(body) {
+                    // jquery自动将响应的正文从json字符串,解析成js对象数组
+                    // 因此直接for循环遍历即可
+                    let containerRight =  document.querySelector('.container-right');
+                    for(let blog of body) {
+                        // 构造整个博客div
+                        let blogDiv =  document.createElement('div');
+                        blogDiv.className = 'blog';
+                        // 构造标题
+                        let titleDiv = document.createElement('div');
+                        titleDiv.className = 'title';
+                        titleDiv.innerHTML = blog.title;
+                        blogDiv.appendChild(titleDiv);
+                        // 构造发布时间
+                        let postTimeDiv = document.createElement('div');
+                        postTimeDiv.className = 'date';
+                        postTimeDiv.innerHTML = blog.postTime;
+                        blogDiv.appendChild(postTimeDiv);
+                        // 构造博客摘要
+                        let contentDiv = document.createElement('div');
+                        contentDiv.className = 'desc';
+                        contentDiv.innerHTML = blog.content;
+                        blogDiv.appendChild(contentDiv);
+                        // 构造查看全文按钮
+                        let a = document.createElement('a');
+                        a.innerHTML = '查看全文 &gt;&gt;';
+                        // 让博客详情页知道是点了哪个博客
+                        a.href = 'blog_detail.html?blogId=' + blog.blogId;
+                        blogDiv.appendChild(a);
+
+                        // 把blogDiv添加到父元素中
+                        containerRight.appendChild(blogDiv);
+
+                    }
+                }
+            });
+        }
+        // 调用函数
+        getBlogs();
+
+        function checkLogin() {
+            $.ajax({
+                type:'get',
+                url:'login',
+                success: function(body){
+                    if(body.userId && body.userId > 0){
+                        // 登录成功
+                        // 把用户名显示在侧边
+                        let h2 = document.querySelector('.container-left .card h2');
+                        h2.innerHTML = body.username;
+                    } else {
+                        // 未登录,强制跳转到登录页
+                        location.assign('login.html');
+                    }
+                }
+            }); 
+        }
+        // 函数调用
+        checkLogin();
+
+    </script>
+
+</body>
+</html>
