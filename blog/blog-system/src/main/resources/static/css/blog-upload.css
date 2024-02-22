@@ -1,0 +1,85 @@
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+    
+}
+html,body {
+    height: 100%;
+}
+
+body {
+    /* background-image: url(../image/1.jpeg); */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+}
+
+.conter1 {
+    /* display:flex; */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: calc(100% - 50px);
+
+}
+
+.upload { 
+    height:300px;
+    width: 300px;
+    background-color:rgba(100, 187, 8, 0.3);
+    border-radius: 15px;
+}
+label {
+    margin-top: 20px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+   
+}
+.yuan {
+    height: 180px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.previewimg {
+    
+    background-image: url(../image/1.jpeg);
+    /* border-radius: 50%; */
+    margin-right: 30px;
+    height: 100px;
+    width: 100px;
+    object-fit: cover;
+}
+.previewimg1 {
+    
+    background-image: url(../image/1.jpeg);
+    border-radius: 50%;
+    height: 100px;
+    width: 100px;
+    object-fit: cover;
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.checkbutton {
+    background-color: rgba(0, 119, 230, 0.3);
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.prompt {
+    color: #9195a3;
+    font-size: small;
+}
+
+
+

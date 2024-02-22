@@ -1,0 +1,113 @@
+* {
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+    
+}
+html,body {
+    height: 100%;
+}
+
+body {
+    background-image: url(../image/1.jpeg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+}
+
+.daohang {
+    width:100%;
+    height: 50px;
+    background-color: rgba(24, 214, 228, 0.2);
+    display: flex;
+    align-items: center;
+}
+
+.daohang img {
+    width: 40px;
+    height: 40px;
+    margin-left: 30px;
+    margin-right: 10px;
+    border-radius: 50%;
+
+}
+
+.daohang .spacer {
+    /* 这仅用于占位,将主页写博客注销,这三个标签挤到右边 */
+    width: 70%;
+}
+.daohang a {
+    color: rgb(255, 255,255);
+    text-decoration: none; /* 去掉下划线 */
+    /* 加上内边距,可以加大用户点击面积 */
+    padding: 0 10px;
+}
+
+/* 页面主体样式 */
+.container {
+    width: 1100px;
+    /* 注意空格 */
+    height: calc(100% - 50px);
+    margin: 0 auto;
+    /* 测试布局的时候看的
+    background-color: blue; */
+    /* 弹性布局 */
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.container-left {
+    height: 100%;
+    width: 200px;
+    padding: 5px;
+
+}
+
+.container-right {
+    /* height: 100%; */
+    height: calc(100% - 10px);
+    width: 895px;
+    background-color: rgba(255, 255, 170, 0.3);
+    border-radius: 15px;
+    /* 可以有滚动条 */
+    overflow: auto;
+}
+
+/* 左边用户信息 */
+.card {
+    background-color: rgba(255, 170, 170, 0.3);
+    border-radius: 15px;
+    padding: 25px;
+}
+
+.card img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* 用户名字 */
+.card h2 {
+    text-align: center;
+    padding: 10px 0px;
+    word-wrap:break-word;
+}
+
+/* 用户github链接 */
+.card a {
+    text-align: center;
+    display: block;
+    color: blue;
+    text-decoration: none;
+    padding: 10px;
+}
+
+/* 用户的文章与分类 */
+.card .counter {
+    display: flex;
+    justify-content: space-around;
+    padding: 5px;
+}
+
