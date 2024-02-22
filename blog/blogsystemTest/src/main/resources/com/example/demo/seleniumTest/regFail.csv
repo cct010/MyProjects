@@ -1,0 +1,13 @@
+"","","","",用户名未填写!
+"","password","password","ctext",用户名未填写!
+"tenjutest","password","password","12345","'tenjutest'用户名已存在!"
+"ppppp","password","password","ctext",用户名长度不符合要求!
+"ppppp12345yyyyy67890wwwww","password","password","ctext",验证码错误!,用户名长度不符合要求!,页面设置输入最大长度为16
+"peach12345","","","ctext",密码未填写! 或确认密码未填写!
+"peach12345","password","pass123","ctext",密码与确认密码不一致!
+"peach12345","123","123","ctext",密码长度不符合要求!
+"peach12345","ppppp12345yyyyy67890wwwww","ppppp12345yyyyy67890wwwww","ctext",验证码错误!,密码长度不符合要求!,页面设置输入最大长度为16
+"peach12345","password","password","",验证码未填写!
+"tenjutest","password","password","45678",验证码错误!
+"tenjutest","password","password","123",验证码错误!
+"tenjutest","password","password","123456",验证码错误!

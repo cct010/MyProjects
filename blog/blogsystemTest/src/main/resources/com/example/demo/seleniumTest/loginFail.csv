@@ -1,0 +1,11 @@
+"","","",用户名未填写!
+"peach12345","password","",验证码未填写!
+"tenjutest","password","45678",验证码错误!
+"tenjutest","password","123",验证码错误!
+"tenjutest","password","123456",验证码错误!
+"","password","ctext",用户名未填写!
+"ppppp","password","ctext",用户名或密码错误!
+"ppppp12345yyyyy67890wwwww","password","ctext",用户名或密码错误!
+"peach12345","","ctext",密码未填写!
+"peach12345","123","ctext",用户名或密码错误!
+"peach12345","ppppp12345yyyyy67890wwwww","ctext",用户名或密码错误!
