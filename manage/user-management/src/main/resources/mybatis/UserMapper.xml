@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">
+
+    <select id="gerUserByLoginname" resultType="com.example.demo.entity.Userinfo">
+        select * from userinfo where loginname = #{loginname} and isadmin=1
+    </select>
+
+    <select id="getList" resultType="com.example.demo.entity.Userinfo">
+        select id,loginname,username,sex,age,address,qq,email,isadmin
+        from userinfo order by id asc
+    </select>
+
+    <delete id="delUser">
+        delete from userinfo where id=#{id} and id != #{uid}
+    </delete>
+
+    <delete id="delByIds">
+        delete from userinfo where id in
+        <foreach collection="ids" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getUserById" resultType="com.example.demo.entity.Userinfo">
+        select id,loginname,username,sex,age,address,qq,email,isadmin
+        from userinfo where id=#{id}
+    </select>
+
+    <select id="getUserByKey" resultType="java.lang.Integer">
+        select count(*)
+        from userinfo where ${key}=#{value}
+    </select>
+
+    <select id="getUserIdByKey" resultType="java.lang.Integer">
+        select id
+        from userinfo where ${key}=#{value}
+    </select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from userinfo
+        <where>
+            <if test="username!=null">
+                username like concat('%',#{username},'%')
+            </if>
+            <if test="address!=null">
+               and address like concat('%',#{address},'%')
+            </if>
+            <if test="email!=null">
+               and  email like concat('%',#{email},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="getListByPage" resultType="com.example.demo.entity.Userinfo">
+        select id,loginname,username,sex,age,address,qq,email,isadmin
+        from userinfo
+        <where>
+            <if test="username!=null">
+                username like concat('%',#{username},'%')
+            </if>
+            <if test="address!=null">
+              and address like concat('%',#{address},'%')
+            </if>
+            <if test="email!=null">
+              and email like concat('%',#{email},'%')
+            </if>
+        </where>
+        order by id asc limit #{psize} offset #{offsize}
+    </select>
+
+<!--    select id,loginname,username,sex,age,address,qq,email,isadmin-->
+<!--    from userinfo where username like concat('%','j','%') or-->
+<!--    address like concat('%','','%') or-->
+<!--            email like concat('%','com','%')-->
+<!--    order by id asc limit 3 offset 0 ;-->
+
+<!--        select  count(*)-->
+<!--        from userinfo where username like concat('%','j','%') or-->
+<!--        address like concat('%','','%') or-->
+<!--        email like concat('%','com','%')-->
+<!--        -->
+
+    <insert id="add" >
+        insert into userinfo
+        <trim prefix="(" suffix=")" prefixOverrides=",">
+            loginname,username,password
+            <if test="sex!=null">,sex</if>
+            <if test="age!=null">,age</if>
+            <if test="address!=null">,address</if>
+            <if test="qq!=null">,qq</if>
+            <if test="email!=null">,email</if>
+            <if test="isadmin!=null">,isadmin</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" prefixOverrides=",">
+            #{loginname},#{username},#{password}
+            <if test="sex!=null">,#{sex}</if>
+            <if test="age!=null">,#{age}</if>
+            <if test="address!=null">,#{address}</if>
+            <if test="qq!=null">,#{qq}</if>
+            <if test="email!=null">,#{email}</if>
+            <if test="isadmin!=null">,#{isadmin}</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.entity.Userinfo">
+        update userinfo
+        <set>
+            username=#{username},updatetime=#{updatetime}
+            <if test="password!=null"> ,password=#{password}</if>
+            <if test="sex!=null">,sex=#{sex}</if>
+            <if test="age!=null">,age=#{age}</if>
+            <if test="address!=null">,address=#{address}</if>
+            <if test="qq!=null">,qq=#{qq}</if>
+            <if test="email!=null">,email=#{email}</if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

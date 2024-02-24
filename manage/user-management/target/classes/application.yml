@@ -1,0 +1,21 @@
+spring:
+  session:
+    store-type: redis
+    timeout: 1800  # 单位是秒
+    redis:
+      namespace: spring:session # 设置redis的命名空间
+      flush-mode: on_save # redis的刷新模式为在保存时刷新,表示在session数据保存到redis时会刷新过期时间
+  profiles:
+    #active: dev # 开发
+    active: prod # 生产
+
+
+server:
+  servlet:
+    context-path: /manage
+
+
+mybatis:
+  mapper-locations: classpath:mybatis/*Mapper.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

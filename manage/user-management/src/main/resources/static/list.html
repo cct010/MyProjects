@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>用户信息管理系统</title>
+    <!-- 1. 导入CSS的全局样式 -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="js/jquery-easyui-1.5.3/themes/default/easyui.css"/>
+    <link type="text/css" rel="stylesheet" href="js/jquery-easyui-1.5.3/themes/icon.css"/>
+    <script src="js/jquery-easyui-1.5.3/jquery.min.js"></script>
+    <script src="js/jquery-easyui-1.5.3/jquery.easyui.min.js"></script>
+    <script src="js/jquery-easyui-1.5.3/locale/easyui-lang-zh_CN.js"></script>
+    <style type="text/css">
+        td, th {
+            text-align: center;
+        }
+
+        .l-btn-left {
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            margin: 5px;
+            padding: 0;
+            vertical-align: top;
+        }
+        .l-btn-text {
+            display: inline-block;
+            vertical-align: top;
+            width: auto;
+            line-height: 24px;
+            font-size: 15px;
+            padding: 0;
+            margin: 0px 4px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3 style="text-align: center;margin-bottom: 50px;">用户信息列表</h3>
+    <div style="float: left;">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="ipt_name">姓名</label>
+                <input name="name" type="text" class="form-control" id="ipt_name">
+            </div>
+            <div class="form-group">
+                <label for="ipt_address">地址</label>
+                <input name="address" type="text" class="form-control" id="ipt_address">
+            </div>
+            <div class="form-group">
+                <label for="ipt_email">邮箱</label>
+                <input name="email" type="email" class="form-control" id="ipt_email">
+            </div>
+            <button id="submit1" type="button" class="btn btn-default" onclick="mysearch()">查询</button>
+            <!-- <button id="submitclear" type="button" class="btn btn-default" onclick="myclear()">清空输入框</button> -->
+        </form>
+    </div>
+
+
+    <div></div>
+
+
+    <div style="float:left;margin-bottom: 15px;margin-left: 15px;font-size: 16px;" id="toolbar">
+        <a style="font-size: 16px;" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">新增</a>
+        <!-- <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">修改</a> -->
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">批量删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="logout()" plain="true">注销</a>
+    </div>
+
+    <!-- 修改表单 -->
+    <div id="dlg" class="easyui-dialog" style="width:400px" data-options="closed:true,modal:true,border:'thin',buttons:'#dlg-buttons'">
+        <form id="fm" method="post" ajax="true" novalidate style="margin:0;padding:20px 50px">
+            <h3 style="text-align: center;margin-bottom: 20px;">用户信息</h3>
+            <div >
+                <input name="id"  type="hidden" label="编号:" id="id" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="username" class="easyui-textbox" required="true" label="姓名:" id="username" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px" id="loginnameDiv">
+                <input name="loginname" class="easyui-textbox" readonly=true label="登录名:" id="loginname" style="width:100%">
+
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="password" class="easyui-passwordbox" showEye="true" label="密码:" id="password" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="confirmPassword" class="easyui-passwordbox" showEye="true" label="确认密码:" id="confirmPassword" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <!-- <input id="men" type="radio" name="sex" value="01"><span>男</span>
+                <input id="women" type="radio" name="sex" value="02"><span>女</span> -->
+                <label for="sex" style="margin-right: 40px;">性别：</label>
+                <input id="men" type="radio" name="sex" value="男" checked="checked"/>男
+                &nbsp;&nbsp;&nbsp;
+                <input id="women" type="radio" name="sex" value="女"/>女
+            </div>
+            <div style="margin-bottom:10px">
+                <!-- <label for="age">年龄：</label> -->
+                <!-- <input name="age" class="easyui-textbox" type="number" min="0" label="年龄:" id="age" style="width:100%"> -->
+                <input type="number" name="age" class="easyui-numberbox" min="0" max="150"  id="age" label="年龄:" style="width:100%" data-options="min:0">
+            </div>
+            <div style="margin-bottom:10px">
+                <select class="easyui-combobox" name="address" id="address" label="地址" style="width:100%">
+                    <!-- //安徽,背景,重庆,福建,甘肃,广东,贵州,海南,河北,河南,黑龙江,湖北,湖南,吉林,江苏,江西,辽宁,
+                    //内蒙古自治区,宁夏回族自治区,青海,山东,山西.陕西,上海,四川,天津,西藏自治区,
+                    新疆维吾尔自治区,云南,浙江 -->
+                    <option value='安徽'>安徽</option>
+                    <option value='北京'>北京</option>
+                    <option value='重庆'>重庆</option>
+                    <option value='福建'>福建</option>
+                    <option value='甘肃'>甘肃</option>
+                    <option value='广东'>广东</option>
+                    <option value='贵州'>贵州</option>
+                    <option value='海南'>海南</option>
+                    <option value='河北'>河北</option>
+                    <option value='河南'>河南</option>
+                    <option value='黑龙江'>黑龙江</option>
+                    <option value='湖北'>湖北</option>
+                    <option value='湖南'>湖南</option>
+                    <option value='吉林'>吉林</option>
+                    <option value='江苏'>江苏</option>
+                    <option value='江西'>江西</option>
+                    <option value='辽宁'>辽宁</option>
+                    <option value='内蒙古自治区'>内蒙古自治区</option>
+                    <option value='宁夏回族自治区'>宁夏回族自治区</option>
+                    <option value='青海'>青海</option>
+                    <option value='山东'>山东</option>
+                    <option value='山西'>山西</option>
+                    <option value='陕西'>陕西</option>
+                    <option value='上海'>上海</option>
+                    <option value='四川'>四川</option>
+                    <option value='天津'>天津</option>
+                    <option value='西藏自治区'>西藏自治区</option>
+                    <option value='新疆维吾尔自治区'>新疆维吾尔自治区</option>
+                    <option value='云南'>云南</option>
+                    <option value='浙江'>浙江</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:10px">
+                <input name="qq" class="easyui-textbox"  label="QQ:" id="qq" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="email" class="easyui-textbox"  validType="email" id="email" label="邮箱:" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px" id="adminDiv">
+                <label for="isadmin" style="margin-right: 30px;">管理员：</label>
+                <input id="admin_yes" type="radio" disabled="readonly"  name="isadmin" value="1"/>是
+                &nbsp;&nbsp;&nbsp;
+                <input id="admin_no" type="radio" disabled="readonly"  name="isadmin" value="0" checked="checked"/>否
+
+            </div>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser('#fm')" style="width:90px">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:jQuery('#dlg').dialog('close')" style="width:90px">取消</a>
+    </div>
+
+    <!-- 新建表单 -->
+    <div id="dg" class="easyui-dialog" style="width:400px" data-options="closed:true,modal:true,border:'thin',buttons:'#dg-buttons'">
+        <form id="fmN" method="post" ajax="true" novalidate style="margin:0;padding:20px 50px">
+            <h3 style="text-align: center;margin-bottom: 20px;">用户信息</h3>
+            <!-- <div >
+                <input name="id"  type="hidden" label="编号:" id="id" style="width:100%">
+            </div> -->
+            <div style="margin-bottom:10px">
+                <input name="username" class="easyui-textbox" required="true" label="姓名:" id="username" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="loginname" class="easyui-textbox"  required="true" label="登录名:" id="loginname" style="width:100%">
+
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="password" class="easyui-passwordbox" showEye="true"required="true" label="密码:" id="password" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="confirmPassword" class="easyui-passwordbox" showEye="true"required="true" label="确认密码:" id="confirmPassword" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <!-- <input id="men" type="radio" name="sex" value="01"><span>男</span>
+                <input id="women" type="radio" name="sex" value="02"><span>女</span> -->
+                <label for="sex" style="margin-right: 40px;">性别：</label>
+                <input id="men" type="radio" name="sex" value="男" checked="checked"/>男
+                &nbsp;&nbsp;&nbsp;
+                <input id="women" type="radio" name="sex" value="女"/>女
+            </div>
+            <div style="margin-bottom:10px">
+                <!-- <label for="age">年龄：</label> -->
+                <!-- <input name="age" class="easyui-textbox" type="number"  label="年龄:" id="age" style="width:100%"> -->
+                <input type="number" name="age" class="easyui-numberbox" min="0" max="150"  id="age" label="年龄:" style="width:100%" data-options="min:0">
+            </div>
+            <div style="margin-bottom:10px">
+                <select class="easyui-combobox" name="address" id="address" label="地址;" style="width:100%">
+
+                    <!-- <label for="address">地址：</label>
+                    <select name="address" id="address" class="form-control"> -->
+                        <option value='安徽'>安徽</option>
+                        <option value='北京'>北京</option>
+                        <option value='重庆'>重庆</option>
+                        <option value='福建'>福建</option>
+                        <option value='甘肃'>甘肃</option>
+                        <option value='广东'>广东</option>
+                        <option value='贵州'>贵州</option>
+                        <option value='海南'>海南</option>
+                        <option value='河北'>河北</option>
+                        <option value='河南'>河南</option>
+                        <option value='黑龙江'>黑龙江</option>
+                        <option value='湖北'>湖北</option>
+                        <option value='湖南'>湖南</option>
+                        <option value='吉林'>吉林</option>
+                        <option value='江苏'>江苏</option>
+                        <option value='江西'>江西</option>
+                        <option value='辽宁'>辽宁</option>
+                        <option value='内蒙古自治区'>内蒙古自治区</option>
+                        <option value='宁夏回族自治区'>宁夏回族自治区</option>
+                        <option value='青海'>青海</option>
+                        <option value='山东'>山东</option>
+                        <option value='山西'>山西</option>
+                        <option value='陕西'>陕西</option>
+                        <option value='上海'>上海</option>
+                        <option value='四川'>四川</option>
+                        <option value='天津'>天津</option>
+                        <option value='西藏自治区'>西藏自治区</option>
+                        <option value='新疆维吾尔自治区'>新疆维吾尔自治区</option>
+                        <option value='云南'>云南</option>
+                        <option value='浙江'>浙江</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:10px">
+                <input name="qq" class="easyui-textbox"  label="QQ:" id="qq" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px">
+                <input name="email" class="easyui-textbox" validType="email" id="email" label="邮箱:" style="width:100%">
+            </div>
+            <div style="margin-bottom:10px" id="adminDiv">
+                <label for="isadmin" style="margin-right: 30px;">管理员：</label>
+                <input id="admin_yes" type="radio"   name="isadmin" value="1"/>是
+                &nbsp;&nbsp;&nbsp;
+                <input id="admin_no" type="radio"   name="isadmin" value="0" checked="checked"/>否
+
+            </div>
+        </form>
+    </div>
+    <div id="dg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser('#fmN')" style="width:90px">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:jQuery('#dg').dialog('close')" style="width:90px">取消</a>
+    </div>
+
+
+    <table  class="table table-bordered table-hover">
+        <tr class="success">
+            <th>选择</th>
+            <th>编号</th>
+            <th>姓名</th>
+            <th>性别</th>
+            <th>年龄</th>
+            <th>地址</th>
+            <th>QQ</th>
+            <th>邮箱</th>
+            <th>超管</th>
+            <th>操作</th>
+        </tr>
+        <tbody id="info">
+
+        </tbody>
+    </table>
+    <div>
+        <nav aria-label="Page navigation">
+            <ul id="all" class="pagination">
+                <li><a href="javascript:goFirstPage();">首页</a></li>
+                <li><a href="javascript:goPrePage();">上一页</a></li>
+                <li><a href="javascript:goNextPage();">下一页</a></li>
+                <li><a href="javascript:goLastPage();">末页</a></li>
+               <span id="pageinfo" style="text-align: center;font-size: 19px;margin-left: 10px;"></span>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<script>
+    var name = "";
+    var address = "";
+    var email = "";
+    //记录分页
+    var totalCount; // 总条数
+    var pindex=1; // 当前页码
+    var psize = 3; // 每页显示条数
+    var pcount =1;//最大页数
+
+   //获取数据
+   
+   var dataList = myData(pindex);
+   getList(dataList);
+    function getList(data){
+        jQuery("#info").children().remove();//清空数据
+       
+        var datastr;
+        if(data!=""){
+            datastr = data;
+        }
+        jQuery.ajax({
+            url: "/manage/user/list",
+            type: "post",
+            data: datastr,
+            success: function(result){
+                if(result!=null && result.code==200 && result.data!=null){
+                var userinfoList = "";
+                pcount = result.data.pcount; //总页数
+                totalCount = result.data.totalcount; //总条数
+                if(result.data.list!=null){
+                    for(var i =0;i<result.data.list.length;i++){
+                        var userinfo = result.data.list[i];
+
+                        var userinfoDiv =  "<tr id="+ userinfo.id+">" +
+                            "<th> <input type='checkbox'> </th> " +
+                            "<th>"+ userinfo.id+"</th>" +
+                            "<th name='username'>"+ userinfo.username +"</th>" +
+                            "<th name='sex'>"+ userinfo.sex +"</th>" +
+                            "<th name='age'>"+ userinfo.age +"</th>" +
+                            "<th name='address'>"+ (userinfo.address==null?"":userinfo.address) +"</th>" +
+                            "<th name='qq'>"+ (userinfo.qq==null?"":userinfo.qq)+"</th>" +
+                            "<th name='email'>"+ (userinfo.email==null?"":userinfo.email)+"</th>" +
+                            "<th name='isadmin'>"+ (userinfo.isadmin==true?"是":"否")+"</th>" +
+                            // "<th>"+ +"</th>" + href="javascript:void(0)" plain="true" onclick="editUser()
+                            "<th>"+
+                                "<a class='btn btn-default btn-sm' href='javascript:void(0)' plain='true' onclick='editUser("+userinfo.id+")'>修改</a>"+
+                                "<a class='btn btn-default btn-sm' href='javascript:void(0)' plain='true' onclick='delUser("+userinfo.id+")'>删除</a>"+
+                            "</th>" +
+                            "</tr>";
+                        userinfoList = userinfoList + userinfoDiv;
+                    }
+                    jQuery("#info").append(userinfoList);
+                    var textPage = "共 "+totalCount+" 条记录,共 "+ pcount +" 页,当前第 " + pindex +" 页.";
+                    jQuery("#pageinfo").html(textPage);
+                }
+                }
+            }
+        });
+   }
+
+
+
+
+   //查询
+   function mysearch(){
+        name = jQuery("#ipt_name").val();
+        address = jQuery("#ipt_address").val();
+        email = jQuery("#ipt_email").val();
+        pindex = 1;
+        datastr = myData(); //获取参数
+        getList(datastr);
+   }
+
+   //构造数据
+   function myData(pindex){
+        var datastr;
+        datastr = {
+            psize: 3
+        };
+        if(pindex==undefined)pindex=1;
+        if(pindex!=null|| pindex!=""){
+            //有页码要求,追加页码
+            datastr.pindex = pindex;
+            console.log(datastr);
+        }
+         //返回的数据
+        if(name!=""||address!=""||email!=""){
+            datastr.username = name;
+            datastr.address = address;
+            datastr.email = email;
+        }
+        console.log(datastr);
+
+        return datastr;
+   }
+
+   //翻页
+   //首页
+        function goFirstPage(){
+            if(pindex<=1){
+                alert("当前页已经在首页!");
+                return;
+            }
+            pindex = 1;
+
+            //location.href = "blog-list.html";
+            //获取数据
+            var datastr = myData(); //获取参数
+            getList(datastr);
+
+        }
+        //上一页
+        function goPrePage(){
+            if(pindex<=1){
+                alert("当前页已经在首页!");
+                return;
+            }
+
+            pindex = parseInt(pindex) -1;
+            var datastr = myData(pindex); //获取参数
+            getList(datastr);
+            //location.href = "blog-list.html?pindex="+pindex;
+        }
+        //下一页
+        function goNextPage(){
+            if(pindex>= pcount){
+                alert("当前页已经在末页!");
+                return;
+            }
+
+            pindex = parseInt(pindex) +1;
+            var datastr = myData(pindex); //获取参数
+            getList(datastr);
+            //location.href = "blog-list.html?pindex="+pindex;
+        }
+        //末页
+        function goLastPage(){
+            if(pindex>= pcount){
+                alert("当前页已经在末页!");
+                return;
+            }
+            pindex = pcount;
+
+            var datastr = myData(pindex); //获取参数
+            getList(datastr);
+            //location.href = "blog-list.html?pindex="+pcount;
+        }
+
+
+
+
+    var url;
+    function newUser(){
+        jQuery('#dg').dialog('open').dialog('center').dialog('setTitle','新增用户');
+        jQuery('#fmN').form('clear'); //清空数据
+        var data = {
+            sex: '男',
+            address: null,
+            isadmin : 0
+        }
+        jQuery('#fmN').form('load',data); //自动填充表格
+
+    }
+       
+
+        //获取用户信息
+        function getUserById(id,callback){
+            // var el = "#"+id ;
+            //jQuery("#1")[0].cells;
+            //jQuery("#1").children().eq(1).text(); //编号是1,从eq(1)开始
+            //修改:登录名不可修改,姓名,密码,确认密码,性别,年龄地址,QQ,email,管理员不可修改.,有重置按钮.
+            //
+            var strid = {
+                id: id
+            }
+            jQuery.ajax({
+                url: "/manage/user/getuser",
+                type: "post",
+                data: strid,
+                success: function(result){
+                    callback(result);
+                }
+            })
+        }
+
+        var id="";
+
+        //回调函数
+        //将ajax获得的参数给另一个函数
+        function handleResponse(result){
+
+            console.log("接收到的数据: ",result); //得到用户信息
+            if(result!=null && result.code==200 && result.data!=null){
+                //说明用户还存在,没有被别的管理员删除
+                jQuery('#dlg').dialog('open').dialog('center').dialog('setTitle','修改用户');
+                jQuery('#fm').form('clear'); //清空表格
+                var data = result.data;
+               
+                console.log(data.isadmin);
+                data.isadmin===true?data.isadmin=1:data.isadmin=0;
+                // if(data.isadmin === true){
+                //     data.isadmin=1; //改的是value值
+                // } 
+                jQuery('#fm').form('load',data); //自动填充表格
+
+            }else{
+                id= "";
+                var text = "用户已被删除或不存在!";
+                jQuery.messager.alert('Info', text, 'info');
+            }
+        }
+
+        //编辑用户
+        function editUser(id){
+            getUserById(id,handleResponse); //获取用户信息,并填充到表单里
+        }
+
+
+        //单条删除
+        function delUser(id){
+            var el = "#"+id ;
+            var strid = {
+                id: id
+            }
+            //最后一页的数据条数,每页显示条数(总数%页数)
+            //var rows = ( parseInt(totalCount) - ((parseInt(pcount)-1) * parseInt(psize)));
+            var rows = totalCount - ((pcount - 1) * psize);
+            console.log("rows " + rows);
+            if(rows<=1 && pindex == pcount){
+                //在最后一页
+                pindex = pindex -1;
+            }
+            jQuery.ajax({
+                url: "/manage/user/del",
+                type: "post",
+                data: strid,
+                success: function(result){
+                    if(result!=null&&result.code==200&&result.data!=null){
+                        jQuery.messager.alert('Info', "删除成功!", 'info');
+                        //jQuery(el).remove();
+                        //更新数据
+                        var datastr = myData(pindex); //获取参数
+                        getList(datastr);
+
+                    }else{
+                        var text = result.msg;
+                        jQuery.messager.alert('Info', text, 'info');
+                    }
+                }
+            });
+        }
+
+        //批量删除destroyUser,delUsers
+        function destroyUser(){
+            var names = "";
+            var idarr = [];
+            jQuery("#info").find("tr").each(function(i){
+                if(jQuery(this).find("th:first").find("input").prop("checked")==true){
+                    var name = jQuery(this).children().eq(2).text();
+                    names += (name+", ");
+                    var id =  parseInt(jQuery(this).attr("id"));
+                    idarr.push(id);
+                }
+            });
+            console.log(idarr);
+            //最后一页的数据条数,每页显示条数(总数%页数)
+            console.log("rows" + rows);
+            var rows = totalCount - ((pcount - 1) * psize);
+            if(rows<=idarr.length&&pindex>=pcount){
+                //在最后一页
+                pindex = pindex -1;
+            }
+            var strids = {
+                ids: idarr
+            }
+            if(names!=""){
+                jQuery.messager.confirm('确认对话框', '您确定要删除下列用户吗？'+"<br>"+names, function(r){
+                    if (r){
+                        //发送请求
+                        jQuery.ajax({
+                            url:"/manage/user/delbyids",
+                            type:"post",
+                            data:strids,
+                            success:function(result){
+                                if(result!=null && result.data>0){
+                                    jQuery.messager.alert('提示消息','删除成功!','info');
+                                    //location.href = location.href;
+                                    //更新数据
+                                    var datastr = myData(pindex); //获取参数
+                                    getList(datastr);
+                                }else{
+                                    var text = result.msg;
+                                    jQuery.messager.alert('提示消息',text,'info');
+                                }
+                            }
+                        });
+
+                    }
+                });
+            }else {
+                jQuery.messager.alert('提示消息','您未选择所要删除的用户!','info');
+            }
+        }
+
+
+        //提交用户
+        function saveUser(el){
+            var url;
+
+            var fromId = jQuery(el).parent()[0].id;
+            if(fromId=="dg"){
+                //添加
+                url = "/manage/user/add";
+            }else{
+                url = "/manage/user/update"; //修改
+            }
+           // jQuery('#fm').form('submit',{
+            jQuery(el).form('submit',{
+                url: url,
+                onSubmit: function(){
+                    var isValid = jQuery(this).form('validate'); //确认是否必填都填了,提交的是name值
+                    if (!isValid){
+                        jQuery.messager.alert('Info', "未填写完必填项!", 'info');
+                        return false;
+                    }
+                    var password = jQuery(this).find("#password").val();
+                    var passwordC = jQuery(this).find("#confirmPassword").val();
+                    if(password!=passwordC){
+                        console.log(password,passwordC);
+                        jQuery.messager.alert('Info', "密码与确认密码不一致!", 'info');
+                        return false;
+                    }
+                },
+                success: function(result){
+                    console.log(typeof(result));
+                    var result = eval('(' + result + ')'); //把string类型换成json格式
+                    if(result!=null&&result.code==200&&result.data==1){
+                        jQuery(this).form('clear'); //清除数据
+                        var fromId = jQuery(this).parent()[0].id;
+                        console.log(fromId);
+                        jQuery(this).parent().dialog('close'); //关闭表单
+                        if(fromId=="dg"){
+                            //新增表单的id
+                            jQuery.messager.confirm('Confirm','您是否要继续添加新用户?',function(r){
+                                if (r){
+                                newUser(); //确定新建,就又打开
+                                }
+                            });
+                        }
+                        //更新数据
+                        var datastr = myData(pindex); //获取参数
+                        getList(datastr);
+                    }else{
+                        var text = result.msg;
+                        jQuery.messager.alert('Info', text, 'info');
+                    }
+                   
+                }
+            });
+        }
+
+        //注销
+        function logout(){
+            jQuery.messager.confirm('确认对话框', '您确定要注销吗？', function(r){
+                    if (r){
+                        //发送请求
+                        jQuery.ajax({
+                            url:"/manage/user/logout",
+                            type:"post",
+                            success:function(result){
+                                if(result!=null && result.data>0){
+                                    location.href = '/manage/login.html';
+                                    jQuery.messager.alert('提示消息','注销成功!','info');
+                                    
+                                }else{
+                                    var text = result.msg;
+                                    jQuery.messager.alert('提示消息',text+'注销失败!','info');
+                                }
+                            }
+                        });
+
+                    }
+            });
+        }
+        
+</script>
+</body>
+</html>
