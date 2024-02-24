@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客添加页</title>
+    <link rel="stylesheet" href="css/blog-edit.css">
+    <link rel="stylesheet" href="css/common.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/common.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script> -->
+    <!-- 引入 editor.md 的依赖 -->
+    <link rel="stylesheet" href="editor.md/css/editormd.min.css" />
+    <script src="editor.md/lib/marked.min.js"></script>
+    <script src="editor.md/lib/prettify.min.js"></script>
+    <script src="editor.md/editormd.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="daohang">
+        <img src="./image/头像2.png" alt="头像" >
+        <div class="spacer"></div>
+        <a href="/blog/blog-list.html">主页</a>
+        <a href="/blog/blog-add.html">写博客</a>
+        <a href="/blog/blog-center.html">个人中心</a>
+        <a href="javascript:logout()">注销</a>
+    </div>
+    <!-- 页面主体 -->
+    <div class="container">
+        <!-- 左侧布局 -->
+        <div class="container-left">
+            <div class="card">
+                <img src="./image/头像.png" alt="头像" id="headimg">
+                <h2 id="username">TenjoUtena</h2>
+                <a href="">github</a>
+                <div class="counter">
+                    <span>文章</span>
+                    <span>分类</span>
+                </div>
+                <div class="counter">
+                    <span id="artTotal">-1</span>
+                    <span>0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧布局 -->
+        <div class="container-right">
+            <!-- 标题 -->
+            <div class="title">
+                <input type="text" id="title" placeholder="请输入文章标题" name="title">
+                <button onclick="mysubmit()" name="submit" style="width: 40px;margin-left:3px;margin-right: 3px;" id="submit">发布</button>
+                <button onclick="mysave()" name="submit" id="" class="mysave" >保存</button>
+            </div>
+            <!-- 编辑内容 -->
+            <!-- 这里用id是为了和markdown编辑器对接而设的 -->
+            <div id="editor">
+                <textarea name="content" cols="30" rows="10" style="display: none;"></textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        //左侧显示用户信息
+        showData();
+
+        var editor ;
+        //= editormd("editor" , {
+            // 尺寸必须在这设置,否则会被editormd自动覆盖掉
+        //    width:"100%",
+        //    height: "calc(100% - 50px)",
+        //    markdown: "",
+        //    setValue: "",
+        //    path: "editor.md/lib/",
+        //    saveHTMLToTextarea: true
+       // });
+
+
+
+        var id = getUrlValue("id");//草稿列表来到此页面
+
+        //文章初始化
+        //可能是从草稿列表跳转到这儿的,
+        initArt();
+        //文章的初始化
+        function initArt(){
+            //文章id
+            //id = getUrlValue("id");
+            if(id==""){
+                //说明是新写的文章,没有id
+                 editor = editormd("editor" , {width:"100%",height: "calc(100% - 50px)",
+                             markdown: "", path: "editor.md/lib/",saveHTMLToTextarea: true});
+                return;
+            }
+            var strid = {id : id};
+            jQuery.ajax({
+                url: "/blog/art/detail",
+                type: "post",
+                data : strid,
+                success: function(body){
+                    if(body!=null && body.code==200){
+                        jQuery("#title").val(body.data.title);
+                        //editor.setValue(body.data.content);//填充正文
+                        //while(jQuery("#editor .editormd-markdown-textarea")[0]!=null){
+                        //    editor.setValue(body.data.content);
+                        //}
+                        editor = editormd("editor" , {width:"100%",height: "calc(100% - 50px)",
+                             markdown: body.data.content, path: "editor.md/lib/",saveHTMLToTextarea: true});
+                    }else{
+                        console.log("查询失败,请稍后再试!");
+                    }
+                }
+            }); 
+        }     
+
+        //文章提交
+        function mysubmit(){
+            var title = jQuery("#title");
+            var strdata = {
+                title: title.val(),
+                content: editor.getValue()
+            };
+            if(id!=""){
+                 //有文章id
+                 strdata = {
+                    title: title.val(),
+                    content: editor.getValue(),
+                    id: id
+                };
+            }
+            //判断是否有输入
+            if(title.val() == ""){
+                alert("标题输入为空!");
+                title.focus();
+                return;
+            }
+            if(editor.getValue() == ""){
+                alert("文章内容为空!");
+                return;
+            }
+            // var strdata = {
+            //     title: title.val(),
+            //     content: editor.getValue()
+            // };
+            jQuery.ajax({
+                url: "/blog/art/add",
+                type: "post",
+                data: strdata,
+                success:function(body){
+                    if(body!=null && body.code==200 && body.data==1){
+                        if(confirm("发布文章成功! 是否继续添加新文章?")){
+                           location.href = "/blog/blog-add.html";
+                        //    editor.setValue("");//清空内容
+                        //    title.val("") ;//清空标题
+                        }else{
+                            location.href = "/blog/blog-center.html";
+                        }
+
+                    }else{
+                        var text = body.msg;
+                       // alert(text + "新文章添加失败!");
+                        alert(text);
+                        console.log("新文章添加失败!请稍后再试!");
+                    }
+                }
+            });
+        }
+
+
+
+        
+        //文章保存草稿
+        function mysave(){
+            //判断保存的文章id
+            var title = jQuery("#title");
+            var strdata = {
+                title: title.val(),
+                content: editor.getValue()
+            };
+            if(id!=""){
+                 //有文章id
+                 strdata = {
+                    title: title.val(),
+                    content: editor.getValue(),
+                    id: id
+                };
+            }
+            //判断是否有输入
+            if(title.val() == ""){
+                alert("标题输入为空!");
+                title.focus();
+                return;
+            }
+            if(editor.getValue() == ""){
+                alert("文章内容为空!");
+                return;
+            }
+            jQuery.ajax({
+                url: "/blog/art/draftadd",
+                type: "post",
+                data: strdata,
+                success: function(body){
+                    if(body!=null && body.code==200 && body.data!=null){
+                        //保存成功,返回主键id
+                        id = body.data;
+                        //location.search = "?id="+id;
+                        alert("保存草稿成功!");
+
+                    }else{
+                        //保存失败
+                        var text = body.msg;
+                       // alert(text + "保存草稿失败!");
+                        alert(text);
+                        //alert("保存草稿失败!");
+                    }
+                }
+            });
+        }
+
+
+        
+        
+
+    </script>
+
+</body>
+</html>

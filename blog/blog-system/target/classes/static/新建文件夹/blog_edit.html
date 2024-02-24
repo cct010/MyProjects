@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客编辑页</title>
+    <link rel="stylesheet" href="css/blog-edit.css">
+    <link rel="stylesheet" href="css/common.css">
+    <script src="js/jquery.min.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script> -->
+    <!-- 引入 editor.md 的依赖 -->
+    <link rel="stylesheet" href="editor.md/css/editormd.min.css" />
+    <script src="editor.md/lib/marked.min.js"></script>
+    <script src="editor.md/lib/prettify.min.js"></script>
+    <script src="editor.md/editormd.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="daohang">
+        <img src="./image/头像2.png" alt="头像" >
+        <div class="spacer"></div>
+        <a href="blog-list.html">主页</a>
+        <a href="blog-edit.html">写博客</a>
+        <a href="blog-center.html">个人中心</a>
+        <a href="logout">注销</a>
+    </div>
+    <!-- 页面主体 -->
+    <div class="container">
+        <!-- 左侧布局 -->
+        <div class="container-left">
+            <div class="card">
+                <img src="./image/头像.png" alt="头像" id="headimg">
+                <h2>TenjoUtena</h2>
+                <a href="">github</a>
+                <div class="counter">
+                    <span>文章</span>
+                    <span>分类</span>
+                </div>
+                <div class="counter">
+                    <span id="art">2</span>
+                    <span>3</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧布局 -->
+        <div class="container-right">
+            <!-- <form action="blog" method="post" style="height: 100%"> -->
+                <!-- 标题 -->
+                <div class="title">
+                    <input type="text" id="title" placeholder="请输入文章标题" name="title">
+                    <input type="submit" id="submit" value="发布文章" name="submit">
+                </div>
+                <!-- 编辑内容 -->
+                <!-- 这里用id是为了和markdown编辑器对接而设的 -->
+                <div id="editor">
+                    <textarea name="content" cols="30" rows="10" style="display: none;"></textarea>
+                </div>
+            <!-- </form> -->
+        </div>
+        <script>
+            function checkLogin() {
+                $.ajax({
+                    type:'get',
+                    url:'login',
+                    success: function(body){
+                        if(body.userId && body.userId > 0){
+                            // 登录成功
+                            // 把用户名显示在侧边
+                            let h2 = document.querySelector('.container-left .card h2');
+                            h2.innerHTML = body.username;                            
+                            //显示头像
+                            let headimg = document.querySelector("#headimg");
+                            headimg.src = body.profilePicture;
+
+                        } else {
+                            // 未登录,强制跳转到登录页
+                            location.assign('login.html');
+                        }
+                    }
+                }); 
+            }
+            // 函数调用
+            //checkLogin();
+
+
+            let editor = editormd("editor" , {
+                // 尺寸必须在这设置,否则会被editormd自动覆盖掉
+                width:"100%",
+                height: "calc(100% - 50px)",
+                markdown: "# 这里写下一篇博客",
+                path: "editor.md/lib/"
+            });
+
+           
+            function reviseEdit(){
+                $.ajax({
+                    type:'get',
+                    url : 'revise' + location.search,
+                    success: function(body) {
+                        let editor = editormd("editor" , {
+                        // 尺寸必须在这设置,否则会被editormd自动覆盖掉
+                        width:"100%",
+                        height: "calc(100% - 50px)",
+                        markdown: body.content,
+                        path: "editor.md/lib/"
+                         });
+                        //填充标题
+                        let blogTitle = document.querySelector('.container-right .title #title');
+                        blogTitle.value = body.title;
+                    }
+
+                });
+            }
+            //reviseEdit();
+
+
+            //获取作者文章数量
+            //getArticles();
+            function getArticles() {
+                $.ajax({
+                    type:'post',
+                    url:'author',
+                    success: function(body) {
+                        console.log(body);
+                        // 把username设置到界面上
+                        let articles = document.querySelector('.container-left .card .counter #art');
+                        articles.innerHTML = body ;
+                        console.log(body);
+                    }
+                });
+            }
+
+
+
+        </script>
+    </div>
+</body>
+</html>

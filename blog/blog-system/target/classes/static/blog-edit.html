@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客编辑页</title>
+    <link rel="stylesheet" href="css/blog-edit.css">
+    <link rel="stylesheet" href="css/common.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/common.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script> -->
+    <!-- 引入 editor.md 的依赖 -->
+    <link rel="stylesheet" href="editor.md/css/editormd.min.css" />
+    <script src="editor.md/lib/marked.min.js"></script>
+    <script src="editor.md/lib/prettify.min.js"></script>
+    <script src="editor.md/editormd.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="daohang">
+        <img src="./image/头像2.png" alt="头像" >
+        <div class="spacer"></div>
+        <a href="/blog/blog-list.html">主页</a>
+        <a href="/blog/blog-add.html">写博客</a>
+        <a href="/blog/blog-center.html">个人中心</a>
+        <a href="javascript:logout()">注销</a>
+    </div>
+    <!-- 页面主体 -->
+    <div class="container">
+        <!-- 左侧布局 -->
+        <div class="container-left">
+            <div class="card">
+                <img src="./image/头像.png" alt="头像" id="headimg">
+                <h2 id="username">TenjoUtena</h2>
+                <a href="">github</a>
+                <div class="counter">
+                    <span>文章</span>
+                    <span>分类</span>
+                </div>
+                <div class="counter">
+                    <span id="artTotal">-1</span>
+                    <span>0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧布局 -->
+        <div class="container-right">
+            <!-- 标题 -->
+            <div class="title">
+                <input type="text" id="title" placeholder="请输入文章标题" name="title">
+                <button onclick="mysubmit()" name="submit" id="submit">发布文章</button>
+            </div>
+            <!-- 编辑内容 -->
+            <!-- 这里用id是为了和markdown编辑器对接而设的 -->
+            <div id="editor">
+                <textarea name="content" cols="30" rows="10" style="display: none;"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var editor ;
+        //= editormd("editor" , {width:"100%",height: "calc(100% - 50px)",
+        //                     markdown: "", path: "editor.md/lib/",saveHTMLToTextarea: true});
+        //左侧显示用户信息,获取当前登录者的文章数量,用户名,头像
+        showData();
+        var id = getUrlValue("id");//当前文章id
+
+
+        initArt();
+        //文章的初始化
+        function initArt(){
+            //文章id
+            id = getUrlValue("id");
+            if(id==""){
+                console.log("无效id,无法修改文章,将跳转发布博客页面!");
+                location.href = "/blog/blog-add.html";
+                return;
+            }
+            var strid = {id : id};
+            jQuery.ajax({
+                url: "/blog/art/detail",
+                type: "post",
+                data : strid,
+                success: function(body){
+                    if(body!=null && body.code==200){
+                        jQuery("#title").val(body.data.title);
+                        //while(jQuery("#editor .editormd-markdown-textarea")[0]!=null){
+                        //    editor.setValue(body.data.content);
+                        //}
+                        editor = editormd("editor" , {width:"100%",height: "calc(100% - 50px)",
+                             markdown: body.data.content, path: "editor.md/lib/",saveHTMLToTextarea: true});
+                    }else{
+                        console.log("查询失败,请稍后再试!");
+                    }
+                }
+            }); 
+        }     
+
+        //文章提交,修改文章
+        function mysubmit(){
+            var title = jQuery("#title");
+            if(title.val() == ""){
+                alert("标题输入为空!");
+                title.focus();
+                return;
+            }
+            if(editor.getValue() == ""){
+                alert("文章内容为空!");
+                return;
+            }
+            var strdata = {
+                id: id,
+                title: title.val(),
+                content: editor.getValue()
+            };
+            jQuery.ajax({
+                url: "/blog/art/update",
+                type: "post",
+                data: strdata,
+                success:function(body){
+                    if(body!=null && body.code==200 && body.data==1){
+                        alert("修改文章成功!");
+                        location.href = "/blog/blog-center.html";
+                    }else{
+                        var text = body.msg;
+                        //alert(text + "修改文章失败!");
+                        alert(text );
+                        console.log("修改文章失败!请稍后再试!");
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
