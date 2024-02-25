@@ -312,6 +312,25 @@ public class UserController {
         return AjaxResult.success(1);
     }
 
-
+//    //修改用户头像,linux
+//    @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
+//    @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内
+//    @PostMapping("/uploadimg")
+//    @SneakyThrows
+//    public AjaxResult uploadimg(@RequestPart("file") MultipartFile file , HttpServletRequest request){
+//        //判断类型
+//        System.out.println(file.getContentType());
+//        if(!file.getContentType().contains("image/")){
+//            return AjaxResult.fail(-1,"参数非法!");
+//        }
+//
+//        //判断文件大小,不允许超过2m
+//        long size = file.getSize(); //单位b
+//        double size1 = size/1024.0; //单位kb
+//        if(size1>(1024*2) || size1<=0){
+//            return AjaxResult.fail(-1,"文件超过2MB!");
+//        }
+//        return AjaxResult.success(1);
+//    }
 
 }

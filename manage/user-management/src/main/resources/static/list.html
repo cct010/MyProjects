@@ -387,7 +387,9 @@
    //首页
         function goFirstPage(){
             if(pindex<=1){
-                alert("当前页已经在首页!");
+                //alert("当前页已经在首页!");
+                var text = "当前页已经在首页!";
+                jQuery.messager.alert('提示消息',text,'info');
                 return;
             }
             pindex = 1;
@@ -401,7 +403,9 @@
         //上一页
         function goPrePage(){
             if(pindex<=1){
-                alert("当前页已经在首页!");
+                //alert("当前页已经在首页!");
+                var text = "当前页已经在首页!";
+                jQuery.messager.alert('提示消息',text,'info');
                 return;
             }
 
@@ -413,7 +417,9 @@
         //下一页
         function goNextPage(){
             if(pindex>= pcount){
-                alert("当前页已经在末页!");
+                //alert("当前页已经在末页!");
+                var text = "当前页已经在末页!";
+                jQuery.messager.alert('提示消息',text,'info');
                 return;
             }
 
@@ -425,7 +431,9 @@
         //末页
         function goLastPage(){
             if(pindex>= pcount){
-                alert("当前页已经在末页!");
+                //alert("当前页已经在末页!");
+                var text = "当前页已经在末页!";
+                jQuery.messager.alert('提示消息',text,'info');
                 return;
             }
             pindex = pcount;
