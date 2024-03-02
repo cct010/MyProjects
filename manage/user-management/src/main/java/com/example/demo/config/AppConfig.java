@@ -34,6 +34,7 @@ public class AppConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/image/**")
                 .excludePathPatterns("/js/**")
                 .excludePathPatterns("/upload/**")
+                .excludePathPatterns("/captcha/**")
                 .excludePathPatterns("/login.html")
                 .excludePathPatterns("/user/login")
                 .excludePathPatterns("/user/getcaptcha")

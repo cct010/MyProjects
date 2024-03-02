@@ -116,5 +116,20 @@ public class RedisUtils {
         return firstSet;
     }
 
+    //获取key的value ,并同时删除key
+    public String deleteKey(String key){
+        List<Object> results = stringRedisTemplate.executePipelined(new RedisCallback<Object>() {
+            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                StringRedisConnection stringRedisConn = (StringRedisConnection)connection;
+                stringRedisConn.get(key);
+                stringRedisConn.del(key);
+                return null;
+            }
+        });
+        if(results.get(0) == null)return "-1";
+        //System.out.println(results.get(0));
+        return (String) results.get(0);
+    }
+
 
 }

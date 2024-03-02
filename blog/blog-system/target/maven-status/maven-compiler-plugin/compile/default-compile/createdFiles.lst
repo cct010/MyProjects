@@ -10,12 +10,14 @@ com\example\demo\config\LoginInterceptor.class
 com\example\demo\common\CaptchaUtils.class
 com\example\demo\mapper\UserMapper.class
 com\example\demo\controller\ArticleController.class
+com\example\demo\config\ScheduleConfig.class
 com\example\demo\controller\CommentController.class
 com\example\demo\mapper\ArticleMapper.class
 com\example\demo\mapper\CommentMapper.class
 com\example\demo\config\AppConfig.class
 com\example\demo\entity\Commentinfo.class
 com\example\demo\config\AccessLimit.class
+com\example\demo\common\RedisUtils$2.class
 com\example\demo\config\ErrorAdvice.class
 com\example\demo\common\PreHandleFalseResponse.class
 com\example\demo\config\DedupInterceptor.class
@@ -27,6 +29,7 @@ com\example\demo\common\AopLog.class
 com\example\demo\config\WebsInterceptor.class
 com\example\demo\entity\vo\CommentinfoVO.class
 com\example\demo\service\UserService.class
+com\example\demo\common\ImageScanner.class
 com\example\demo\config\DedupLimit.class
 com\example\demo\common\ArticleUtils.class
 com\example\demo\common\AjaxResult.class

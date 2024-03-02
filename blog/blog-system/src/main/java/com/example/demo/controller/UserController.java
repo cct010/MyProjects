@@ -130,11 +130,11 @@ public class UserController {
     @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
     @PostMapping("/getcaptcha")
     public AjaxResult getCaptcha(){
-        String captchapath = "/blog/upload/line.png";
-        String code = CaptchaUtils.createCaptch(); //生成验证码图片,获取验证码文本
         String codeuuid = UUID.randomUUID().toString().replace("-",""); // 32位
+        String code = CaptchaUtils.createCaptch(codeuuid); //生成验证码图片,获取验证码文本
+        String captchapath = "/blog/captcha/" + codeuuid + ".png"; //生成的图片路径
         //存储到redis,设置过期时间3分钟
-        redisUtils.set(codeuuid,code,Duration.ofMinutes(3));
+        redisUtils.set(codeuuid,code, Duration.ofMinutes(3));
         //返回图片地址
         captchapath = captchapath+"?res="+codeuuid;
         return AjaxResult.success(captchapath);
@@ -157,13 +157,16 @@ public class UserController {
         if(usernameLength<6||usernameLength>16||passwordLength<6||passwordLength>16){
             return AjaxResult.fail(-1,"用户名或密码错误!");
         }
+
         //判断验证码
-        if(redisUtils.get(uuid)==null){
+        //从redis上根据uuid获取code,并删除redis上的uuid
+        String getCode = redisUtils.deleteKey(uuid); //防止3分钟内重复使用该key
+        //判断验证码,返回-1表示没有找到
+        if(getCode.equals("-1")){
             return AjaxResult.fail(-1,"验证码过期!");
         }
-        String getCode = redisUtils.get(uuid); //获取redis上存储的验证码
-        redisUtils.del(uuid); //获取里面的验证码后,删除此key,防止3分钟内重复使用该验证码
-        if(captchatext.length()!=5 || !getCode.equals(captchatext)){
+        //验证码判断忽略大小写
+        if(captchatext.length()!=5 || !CaptchaUtils.verify(getCode,captchatext)){
             if(!userinfo.getUsername().equals("tenjutest")){ //测试账号tenjutest,验证码12345
                 return AjaxResult.fail(-1,"验证码错误!");
             }else {
@@ -172,6 +175,7 @@ public class UserController {
                 }
             }
         }
+
         //判断用户此次登录次数,1小时内超过6次直接返回
         //"access:U=" + userId + "M=" + method;
         String userId = request.getRemoteAddr(); //用户ip

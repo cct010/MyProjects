@@ -34,6 +34,7 @@ public class AppConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/image/**")
                 .excludePathPatterns("/js/**")
                 .excludePathPatterns("/upload/**")
+                .excludePathPatterns("/captcha/**")
                 .excludePathPatterns("/login.html") //不拦截登陆和注册网页
                 .excludePathPatterns("/reg.html")
                 .excludePathPatterns("/user/login") //不拦截登陆和注册方法,获取验证码
