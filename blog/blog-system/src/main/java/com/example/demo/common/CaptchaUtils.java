@@ -2,6 +2,7 @@ package com.example.demo.common;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.captcha.generator.RandomGenerator;
 import cn.hutool.core.lang.Console;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -23,14 +24,22 @@ import java.nio.channels.FileChannel;
 @Data
 public class CaptchaUtils {
    // private static final String path1 = "./upload/line.png";
+
+    // char[] value = {'I','0','o','O','l','C'}; // I->l 总是像l,字母大写O 0 -> O/O0,l -> l/I,o -> o/0,数字0
+    //public static final String BASE_CHAR_NUMBER = "abcdefghijklmnopqrstuvwxyz".toUpperCase() + "abcdefghijklmnopqrstuvwxyz0123456789";
+    public static final String BASE_CHAR_NUMBER = "abcdefghjklmnpqrstuvwxyz".toUpperCase() + "abcdefghijkmnpqrstuvwxyz123456789";
+
+
     @SneakyThrows
     public static String createCaptch(String name) {
+        //自定义内容的验证码
+        RandomGenerator randomGenerator = new RandomGenerator(BASE_CHAR_NUMBER, 5);
         //定义图形验证码的长和宽
-        //LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
-        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 80,5,50);
-        while(containsKey(lineCaptcha.getCode())){
-            lineCaptcha = CaptchaUtil.createLineCaptcha(200, 80,5,50);
-        }
+        // LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 80,5,50);
+        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 80);
+        lineCaptcha.setGenerator(randomGenerator);
+        // 重新生成code
+        lineCaptcha.createCode();
 
         File path = new File(ResourceUtils.getURL("classpath:").getPath());
         if(!path.exists()) {
@@ -72,18 +81,6 @@ public class CaptchaUtils {
 
     }
 
-    //判断验证码里面是否有太难辨认的字母数字
-    private static Boolean containsKey(String key){
-        //防止 有一些字母太相似
-        // I->l 总是像l,字母大写O 0 -> O/O0,l -> l/I,o -> o/0,数字0
-        char[] value = {'I','0','o','O','l','C'};
-        for (char c : value) {
-            String tmp = String.valueOf(c);
-            if (key.contains(tmp)) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 
 }

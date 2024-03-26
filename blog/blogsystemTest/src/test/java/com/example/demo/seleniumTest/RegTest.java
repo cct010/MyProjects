@@ -21,6 +21,7 @@ import java.io.IOException;
  * Date: 2024-01-02
  * Time: 20:37
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)//人工控制执行顺序
 public class RegTest extends InitAndEnd{
 
     @Test
@@ -43,7 +44,7 @@ public class RegTest extends InitAndEnd{
         webDriver.findElement(By.cssSelector("#confirmPassword")).sendKeys(password);
         webDriver.findElement(By.cssSelector("#captchatext")).sendKeys(captcha);
         webDriver.findElement(By.cssSelector("#submit")).click();
-        //隐式等待,等待弹窗的出现
+        //显示等待,等待弹窗的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         wait.until(ExpectedConditions.alertIsPresent());
         //判断弹窗,提示框文本
@@ -68,7 +69,7 @@ public class RegTest extends InitAndEnd{
         webDriver.findElement(By.cssSelector("#confirmPassword")).sendKeys(confirmPassword);
         webDriver.findElement(By.cssSelector("#captchatext")).sendKeys(captcha);
         webDriver.findElement(By.cssSelector("#submit")).click();
-        //隐式等待,等待弹窗的出现
+        //显示等待,等待弹窗的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 30);
         wait.until(ExpectedConditions.alertIsPresent());
         //判断弹窗,提示框文本

@@ -30,7 +30,7 @@ public class Article extends InitAndEnd{
         }
         //webDriver.findElement(By.cssSelector("body > div.container > div.container-right > div.title > button.mysave")).click();
         webDriver.findElement(By.cssSelector(element)).click();
-        //隐式等待,等待弹窗的出现
+        //显式等待,等待弹窗的出现
         WebDriverWait waitAlert = new WebDriverWait(webDriver, 10);
         waitAlert.until(ExpectedConditions.alertIsPresent());
         String text = webDriver.switchTo().alert().getText();
@@ -81,7 +81,7 @@ public class Article extends InitAndEnd{
         //获取文章数量
         int oldnumber = Integer.parseInt(webDriver.findElement(By.cssSelector("#artTotal")).getText());
 
-        //隐式等待,等待弹窗的出现
+        //显式等待,等待弹窗的出现
         WebDriverWait waitAlert = new WebDriverWait(webDriver, 10);
         waitAlert.until(ExpectedConditions.alertIsPresent());
         String text = webDriver.switchTo().alert().getText(); //判断弹窗提示信息

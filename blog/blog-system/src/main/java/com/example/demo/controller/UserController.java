@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.common.*;
 import com.example.demo.config.AccessLimit;
 import com.example.demo.config.DedupLimit;
+import com.example.demo.config.MyContextPath;
 import com.example.demo.entity.Userinfo;
 import com.example.demo.entity.vo.UserinfoVO;
 import com.example.demo.service.ArticleService;
@@ -59,6 +60,9 @@ public class UserController {
     @Resource
     private RedisUtils redisUtils;
 
+    @Autowired
+    private MyContextPath myContextPath;
+
     //注册,1h内只允许用户注册一次
     @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
     @DedupLimit(expireTime = 5000) //去除重复请求
@@ -77,15 +81,16 @@ public class UserController {
             return AjaxResult.fail(-1,"重复注册!"); //重复注册
         }
         //判断验证码
-        if(redisUtils.get(uuid)==null){
+        //从redis上根据key获取code,并删除redis上的key
+        String contextPath = myContextPath.getContextPath(); //获取配置文件的项目路径
+        String key = "captcha:P=" + contextPath + "K=" + uuid;
+        String getCode = redisUtils.deleteKey(key); //防止3分钟内重复使用该key
+        //判断验证码,返回-1表示没有找到
+        if(getCode.equals("-1")){
             return AjaxResult.fail(-1,"验证码过期!");
         }
-        String getCode = redisUtils.get(uuid); //获取redis上存储的验证码
-        redisUtils.del(uuid); //获取里面的验证码后,删除此key,防止3分钟内重复使用该验证码
-//        if(captchatext.length()!=5 || !getCode.equals(captchatext)){
-//            return AjaxResult.fail(-1,"验证码错误!");
-//        }
-        if(captchatext.length()!=5 || !getCode.equals(captchatext)){
+        //验证码判断忽略大小写
+        if(captchatext.length()!=5 || !CaptchaUtils.verify(getCode,captchatext)){
             if(!userinfo.getUsername().equals("tenjutest")){ //测试账号tenjutest,验证码12345
                 return AjaxResult.fail(-1,"验证码错误!");
             }else {
@@ -134,7 +139,9 @@ public class UserController {
         String code = CaptchaUtils.createCaptch(codeuuid); //生成验证码图片,获取验证码文本
         String captchapath = "/blog/captcha/" + codeuuid + ".png"; //生成的图片路径
         //存储到redis,设置过期时间3分钟
-        redisUtils.set(codeuuid,code, Duration.ofMinutes(3));
+        String contextPath = myContextPath.getContextPath(); //获取配置文件的项目路径
+        String key = "captcha:P=" + contextPath + "K=" + codeuuid;
+        redisUtils.set(key,code, Duration.ofMinutes(3));
         //返回图片地址
         captchapath = captchapath+"?res="+codeuuid;
         return AjaxResult.success(captchapath);
@@ -159,8 +166,10 @@ public class UserController {
         }
 
         //判断验证码
-        //从redis上根据uuid获取code,并删除redis上的uuid
-        String getCode = redisUtils.deleteKey(uuid); //防止3分钟内重复使用该key
+        //从redis上根据key获取code,并删除redis上的key
+        String contextPath = myContextPath.getContextPath(); //获取配置文件的项目路径
+        String key = "captcha:P=" + contextPath + "K=" + uuid;
+        String getCode = redisUtils.deleteKey(key); //防止3分钟内重复使用该key
         //判断验证码,返回-1表示没有找到
         if(getCode.equals("-1")){
             return AjaxResult.fail(-1,"验证码过期!");
@@ -177,17 +186,13 @@ public class UserController {
         }
 
         //判断用户此次登录次数,1小时内超过6次直接返回
-        //"access:U=" + userId + "M=" + method;
-        String userId = request.getRemoteAddr(); //用户ip
-        String loignFalse = "loginFalse:U=" +userId+"N="+ userinfo.getUsername();
+        String userIp = request.getRemoteAddr(); //用户ip
+        String loignFalse = "loginFalse:U=" +userIp +"N="+ userinfo.getUsername() + "P=" + contextPath;
         int count =0;
-        if(redisUtils.get(userinfo.getUsername())!=null){
+        if(redisUtils.get(loignFalse)!=null){
             //count = Integer.parseInt(redisUtils.get(userinfo.getUsername()));
             count = Integer.parseInt(redisUtils.get(loignFalse));
             if(count>=6){
-                // long time = redisUtils.getExpireSeconds(userinfo.getUsername());//得到的是时间,是秒数
-                // System.out.println(time);
-                //String timeout = redisUtils.getExpire(userinfo.getUsername());
                 String timeout = redisUtils.getExpire(loignFalse);
                 System.out.println(timeout);
                 //用户登录次数超过6
@@ -195,8 +200,6 @@ public class UserController {
             }
         }
 
-        //判断有没有多地登陆
-        // del spring:session:sessions:8d043ae0-350a-4968-9ab0-e424aa44f981删除它session就不存在了
 
         //查询数据库
         Userinfo user = userService.getUserByName(userinfo.getUsername());
@@ -210,19 +213,22 @@ public class UserController {
                 session.setAttribute(AppVariable.USER_SESSION_KEY,user);
                 user.setPassword("");//返回之前,将密码隐藏
 
-                //判断之前有无存储session到redis
-                String keyuser = user.getUsername() +":session";
-                if(redisUtils.get(keyuser)!=null && !redisUtils.get(keyuser).equals(session.getId())){
-                    String sessionid = redisUtils.get(keyuser);
-                    //移除session
-                    String delsession = "spring:session:sessions:" + sessionid;
-                    redisUtils.del(delsession);
-                }
-                //将session存储到redis上
-                redisUtils.setSession(keyuser, session.getId());
+                //判断有没有多地登陆
+                // del spring:session:sessions:8d043ae0-350a-4968-9ab0-e424aa44f981删除它session就不存在了
+//                //判断之前有无存储session到redis,唯一登陆,暂时有一些细节问题需处理
+//                String keyuser = user.getUsername() +":session";
+//                if(redisUtils.get(keyuser)!=null && !redisUtils.get(keyuser).equals(session.getId())){
+//                    String sessionid = redisUtils.get(keyuser);
+//                    //移除session
+//                    String delsession = "spring:session:sessions:" + sessionid;
+//                    redisUtils.del(delsession);
+//                }
+//                //将session存储到redis上
+//                redisUtils.setSession(keyuser, session.getId());
 
                 //如果之前有记录用户登录次数
                 //移除redis记录的用户登录次数
+
                 redisUtils.del(loignFalse);
                 return AjaxResult.success(user);
             }
@@ -255,7 +261,7 @@ public class UserController {
 
     //注销
     @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
-    @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内
+   // @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内
     @PostMapping("/logout")
     public AjaxResult logout(HttpSession session){
         session.removeAttribute(AppVariable.USER_SESSION_KEY);

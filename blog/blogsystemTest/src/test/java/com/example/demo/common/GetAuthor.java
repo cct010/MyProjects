@@ -17,7 +17,7 @@ public class GetAuthor extends InitAndEnd{
     public static void getAuthor(String username,String element){
         WebDriverWait waitUser = new WebDriverWait(webDriver,10);
         waitUser.until(ExpectedConditions.not(ExpectedConditions.textToBe(By.cssSelector(element),"-1")));
-        //隐式等待,等待用户名的出现
+        //显式等待,等待用户名的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#username")));
         //wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#artList > div:nth-child(1) > a")));

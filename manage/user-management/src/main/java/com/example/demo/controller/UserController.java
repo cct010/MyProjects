@@ -3,15 +3,14 @@ package com.example.demo.controller;
 import com.example.demo.common.*;
 import com.example.demo.config.AccessLimit;
 import com.example.demo.config.DedupLimit;
+import com.example.demo.config.MyContextPath;
 import com.example.demo.entity.Userinfo;
 import com.example.demo.service.UserService;
-import lombok.SneakyThrows;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,6 +46,9 @@ public class UserController {
     @Resource
     private RedisUtils redisUtils;
 
+    @Autowired
+    private MyContextPath myContextPath; //获取项目路径
+
     //登陆之前获取验证码
     @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
     @PostMapping("/getcaptcha")
@@ -56,7 +58,9 @@ public class UserController {
         String code = CaptchaUtils.createCaptch(codeuuid); //生成验证码图片,获取验证码文本
         String captchapath = "/manage/captcha/" + codeuuid + ".png"; //生成的图片路径
         //存储到redis,设置过期时间3分钟
-        redisUtils.set(codeuuid,code, Duration.ofMinutes(3));
+        String contextPath = myContextPath.getContextPath(); //获取配置文件的项目路径
+        String key = "captcha:P=" + contextPath + "K=" + codeuuid;
+        redisUtils.set(key,code, Duration.ofMinutes(3));
         //返回图片地址
         captchapath = captchapath+"?res="+codeuuid;
         return AjaxResult.success(captchapath);
@@ -73,10 +77,12 @@ public class UserController {
                 !StringUtils.hasLength(captchatext) || !StringUtils.hasLength(uuid)){
             return AjaxResult.fail(-1,"参数非法!");
         }
-        String ipUser = request.getRemoteAddr(); //用户ip
+
 
         //从redis上根据uuid获取code,并删除redis上的uuid
-        String getCode = redisUtils.deleteKey(uuid); //防止3分钟内重复使用该key
+        String contextPath = myContextPath.getContextPath(); //获取配置文件的项目路径
+        String key = "captcha:P=" + contextPath + "K=" + uuid;
+        String getCode = redisUtils.deleteKey(key); //防止3分钟内重复使用该key
         //判断验证码,返回-1表示没有找到
         if(getCode.equals("-1")){
             return AjaxResult.fail(-1,"验证码过期!");
@@ -91,12 +97,15 @@ public class UserController {
                 }
             }
         }
+
         //判断用户此次登录次数,1小时内超过6次直接返回
+        String userIp= request.getRemoteAddr(); //用户ip
+        String userLoginCount = "loginFalse:U=" + userIp +"N="+ userinfo.getLoginname() + "P=" + contextPath;
         int count =0;
-        if(redisUtils.get(userinfo.getLoginname())!=null){
-            count = Integer.parseInt(redisUtils.get(userinfo.getLoginname()));
+        if(redisUtils.get(userLoginCount)!=null){
+            count = Integer.parseInt(redisUtils.get(userLoginCount));
             if(count>=6){
-                String timeout = redisUtils.getExpire(userinfo.getLoginname());
+                String timeout = redisUtils.getExpire(userLoginCount);
                 System.out.println(timeout);
                 //用户登录次数超过6
                 return AjaxResult.fail(-1,"登录操作频繁! "+ timeout +" 时间后重试!");
@@ -119,14 +128,14 @@ public class UserController {
 
                 //如果之前有记录用户登录次数
                 //移除redis记录的用户登录次数
-                redisUtils.del(userinfo.getLoginname());
+                redisUtils.del(userLoginCount);
                 return AjaxResult.success(user);
             }
         }
 
-        //用户不存在或用户存在但密码错误,redis记录次数增加+1
+        //用户不存在或用户存在但密码错误,redis记录用户登录次数增加+1
         count = count+1;
-        redisUtils.set(userinfo.getLoginname(), String.valueOf(count), Duration.ofHours(1));//过期时间1h
+        redisUtils.set(userLoginCount, String.valueOf(count), Duration.ofHours(1));//过期时间1h
 
         return AjaxResult.fail(-1,"用户名或密码错误!");
     }
@@ -308,7 +317,7 @@ public class UserController {
 
     //注销
     @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
-    @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内
+   // @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内 ,新改的代码在注销这里有点问题
     @PostMapping("/logout")
     public AjaxResult logout(HttpSession session){
         session.removeAttribute(AppVariable.USER_SESSION_KEY);
@@ -336,4 +345,37 @@ public class UserController {
 //        return AjaxResult.success(1);
 //    }
 
+    //json格式
+    @PostMapping("/testlogin")
+    @DedupLimit(expireTime = 50000) //去除重复请求,50秒之内
+    public AjaxResult logintest(@RequestBody Userinfo userinfo){
+        String reslut = "loginname: "+ userinfo.getLoginname() + " password: " + userinfo.getPassword() ;
+        return AjaxResult.success(reslut);
+    }
+//
+//
+    //上传文件
+    @PostMapping("/testupload")
+    @DedupLimit(expireTime = 50000) //去除重复请求,50秒之内
+    public AjaxResult uploadtest(@RequestPart("file")MultipartFile file){
+        String filename = file.getOriginalFilename();
+        return AjaxResult.success(filename);
+    }
+//
+//    //键值对
+//    @PostMapping("/testkey")
+//    @DedupLimit(expireTime = 50000) //去除重复请求,50秒之内
+//    public AjaxResult getKey(Userinfo userinfo){
+//        String reslut = "loginname: "+ userinfo.getLoginname() + " password: " + userinfo.getPassword() ;
+//        return AjaxResult.success(reslut);
+//    }
+
+
+    //上传文件
+    @PostMapping("/uploadimg")
+    @DedupLimit(expireTime = 50000) //去除重复请求,50秒之内
+    public AjaxResult uploadtest1(@RequestPart("file")MultipartFile file){
+        String filename = file.getOriginalFilename();
+        return AjaxResult.success(filename);
+    }
 }

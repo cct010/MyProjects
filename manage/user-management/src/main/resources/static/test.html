@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/common.js"></script>
+</head>
+<body>
+    <div class="row">
+        <span>用户名</span>
+        <input type="text" id="loginname" name="loginname" placeholder="手机号/邮箱/用户名">
+    </div>
+    <div class="row">
+        <span>密码</span>
+        <input type="password" id="password" name="password">
+    </div>
+    <div class="row">
+        <button id="submit" onclick="mysubmit()">登陆</button>
+    </div>
+
+    <script>
+ //点击登陆按钮
+ function mysubmit(){
+            //校验参数,是否填写正确
+            //非空判断
+            var loginname = jQuery("#loginname");
+            var password = jQuery("#password");
+            //发送请求
+            var strdata = {
+                loginname: loginname.val(),
+                password: password.val(),
+            };
+            strdata = JSON.stringify(strdata); //json格式
+
+            jQuery.ajax({
+                type: "post",
+                url: "/user/testlogin",
+               // data: JSON.stringify(strdata),
+               data: strdata,
+                success: function(body){
+                    console.log(body);
+                    //响应的结果
+                    if(body != null && body.code == 200 && body.data!=null){
+                        //执行成功,登录成功
+                        console.log(body.data);
+                        
+                    }
+
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

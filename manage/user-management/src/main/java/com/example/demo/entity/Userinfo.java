@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class Userinfo implements Serializable {
-    private static final long serialVersionUID = 4542684839012057215L; //序列化id
+    private static final long serialVersionUID = 8413358021046803164L ;//4542684839012057215L; //序列化id //8413358021046803164
     private Integer id;
     private String loginname;
     private String username;

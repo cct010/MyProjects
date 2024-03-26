@@ -3,7 +3,9 @@ package com.example.demo.config;
 import cn.hutool.json.JSONUtil;
 import com.example.demo.common.PreHandleFalseResponse;
 import com.example.demo.common.RedisUtils;
+import com.example.demo.common.ReqDeupUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -33,6 +35,13 @@ public class DedupInterceptor implements HandlerInterceptor {
     @Resource
     private RedisUtils redisUtils;
 
+    @Resource
+    private ReqDeupUtils reqDeupUtils;
+
+    @Autowired
+    private ObjectMapper objectMapper; //属性注入
+
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //  判断是否属于方法handler
@@ -48,29 +57,14 @@ public class DedupInterceptor implements HandlerInterceptor {
             //  获取方法名 这里实现对方法级别的限制访问
             String methodName = ((HandlerMethod) handler).getMethod().getName();
             String method = request.getRequestURI(); //获取web项目的相对路径
-            //获取request参数,需要排序,不然位置不同,生成的md5也不一样
-            Map<String, String[]> parameterMap = request.getParameterMap();
-            String parameter = "";
-            if(!parameterMap.isEmpty()){
-                List<Map.Entry<String,String[]>> lstEntry=new ArrayList<>(parameterMap.entrySet());
-                lstEntry.sort(((o1, o2) -> {
-                    return o1.getKey().compareTo(o2.getKey());
-                }));
-                //String parameter = JSONUtil.toJsonStr(parameterMap);
-                parameter = JSONUtil.toJsonStr(lstEntry);
-            }
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("url", String.valueOf(request.getRequestURL()));
-            map.put("parameter",parameter);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String paramTreeMapJSON = objectMapper.writeValueAsString(map);
-            String md5deDupParam = DigestUtils.md5DigestAsHex(paramTreeMapJSON.getBytes());  //进行MD5
+            //获取request参数,需要排序,不然位置不同,生成的md5也不一样
+            String md5deDupParam = reqDeupUtils.dedupParam(request);
+
 
             //存储到redis
             String userId = request.getRemoteAddr(); //用户ip
             String KEY = "dedup:U=" + userId + "M=" + method + "P=" + md5deDupParam;
-
 
             //long expireTime =  1900000;// 3000毫秒过期，3000ms内的重复请求会认为重复
             long expireAt = System.currentTimeMillis() + expireTime;

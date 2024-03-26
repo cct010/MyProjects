@@ -72,7 +72,7 @@ public class AddTest extends LoginInit {
         //获取文章数量
         String oldnumber = webDriver.findElement(By.cssSelector("#artTotal")).getText();
 
-        //隐式等待,等待弹窗的出现
+        //显式等待,等待弹窗的出现
         WebDriverWait waitAlert = new WebDriverWait(webDriver, 10);
         waitAlert.until(ExpectedConditions.alertIsPresent());
         String text = webDriver.switchTo().alert().getText(); //判断弹窗提示信息

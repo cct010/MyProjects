@@ -50,7 +50,7 @@ public class LoginTest extends InitAndEnd {
         webDriver.findElement(By.cssSelector("#captchatext")).sendKeys(captchatext); //验证码
         webDriver.findElement(By.cssSelector("#submit")).click();
 
-        //隐式等待,等待用户名的出现
+        //显示等待,等待用户名的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#username")));
         WebDriverWait waitLink = new WebDriverWait(webDriver,10);

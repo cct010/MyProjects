@@ -24,7 +24,7 @@ public class LoginUtils extends InitAndEnd{
         webDriver.findElement(By.cssSelector("#password")).sendKeys(password);
         webDriver.findElement(By.cssSelector("#captchatext")).sendKeys(captchatext); //验证码
         webDriver.findElement(By.cssSelector("#submit")).click();
-        //隐式等待,等待弹窗的出现
+        //显式等待,等待弹窗的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         wait.until(ExpectedConditions.alertIsPresent());
         //判断弹窗,提示框文本

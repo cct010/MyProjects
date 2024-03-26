@@ -45,12 +45,12 @@ public class LoginInit extends InitAndEnd{
         //Thread.sleep(3000);
         webDriver.findElement(By.linkText("注销")).click();
         //Thread.sleep(3000);
-        //隐式等待,等待弹窗的出现
+        //显式等待,等待弹窗的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 8000);
         wait.until(ExpectedConditions.alertIsPresent());
         //点击弹窗,确认注销
         webDriver.switchTo().alert().accept();
-        //隐式等待,等待验证码按钮可以被点击
+        //显式等待,等待验证码按钮可以被点击
         WebDriverWait waitLogout = new WebDriverWait(webDriver, 8);
         waitLogout.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#captchatext")));
         String cur_url = webDriver.getCurrentUrl();

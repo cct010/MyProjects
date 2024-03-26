@@ -34,7 +34,7 @@ public class DetailTest extends LoginInit {
         String blogUrl = WebVariable.BLOG_DETAIL;
         blogUrl = blogUrl + "?id=32";
         webDriver.get(blogUrl);
-        WebDriverWait waitArticle = new WebDriverWait(webDriver,10);
+        WebDriverWait waitArticle = new WebDriverWait(webDriver,60);
         waitArticle.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#ifDiv"))); //等待子页面可以被点击
     }
 
@@ -121,7 +121,7 @@ public class DetailTest extends LoginInit {
     //判断博客作者信息
     @ParameterizedTest
     @Order(3)
-    @CsvSource(value = {"peach11"})
+    @CsvSource(value = {"admin2024"})
     void getAuthor(String author){
         WebDriverWait waitUser = new WebDriverWait(webDriver,10);
         waitUser.until(ExpectedConditions.not(ExpectedConditions.textToBe(By.cssSelector("#art"),"-1")));

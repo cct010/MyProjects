@@ -34,7 +34,7 @@ public class ListTest extends LoginInit {
     @Test
     @Order(1)
     void getList() {
-        //隐式等待,等待标题的出现
+        //显示等待,等待标题的出现
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         //wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#username")));
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#artList > div:nth-child(1) > a")));
@@ -71,7 +71,7 @@ public class ListTest extends LoginInit {
     @Test
     @Order(3)
     void getLink(){
-        //隐式等待,等待按钮可以被点击
+        //显示等待,等待按钮可以被点击
         WebDriverWait waitLogout = new WebDriverWait(webDriver, 8);
         waitLogout.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#artList > div:nth-child(1) > a")));
         //点击查看全文
@@ -89,7 +89,7 @@ public class ListTest extends LoginInit {
     @Order(4)
     void paging(String url,String element,String msg){
         webDriver.get(url);
-        //隐式等待,等待链接可以被点击
+        //显示等待,等待链接可以被点击
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#artList > div:nth-child(1) > a")));
 

@@ -35,6 +35,7 @@ public class ErrorAdvice {
     @ExceptionHandler(Exception.class)
     public AjaxResult Exception(Exception e){
         String msg = "未知错误,无法定位";
+        log.error(e.getMessage());
         return AjaxResult.fail(-1,msg);
     }
 }

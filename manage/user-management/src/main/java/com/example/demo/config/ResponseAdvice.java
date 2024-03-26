@@ -42,8 +42,8 @@ public class ResponseAdvice implements ResponseBodyAdvice {
                 e.printStackTrace();
             }
         }
-        //return AjaxResult.success(body);
-        return body;
+        return AjaxResult.success(body);
+        //return body;
 
     }
 }

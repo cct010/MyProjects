@@ -50,7 +50,7 @@ public class AopLog {
     //环绕通知
     @Around("log()")
     public Object aroundLog(ProceedingJoinPoint point) throws Throwable {
-        Object result = point.proceed();
+        Object result = point.proceed(); //执行目标方法
         log.info("[返回值]: {}",JSONUtil.toJsonStr(result));
         return result;
     }
