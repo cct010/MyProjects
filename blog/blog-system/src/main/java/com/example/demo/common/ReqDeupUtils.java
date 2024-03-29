@@ -34,10 +34,10 @@ public class ReqDeupUtils {
         Map<String, String[]> parameterMap ;
         StringBuilder parameter = new StringBuilder("");
         //String parameter = "";
-        if(requestType.contains("application/json")){
+        if(requestType!=null && requestType.contains("application/json")){
             //获取json格式,获取请求的body
             parameterMap = objectMapper.readValue(request.getInputStream(), Map.class);
-        }else if(requestType.contains("multipart/form-data")){
+        }else if(requestType!=null && requestType.contains("multipart/form-data")){
             //上传文件的,特别处理一下
             Part part = request.getPart("file"); //只能获取一个文件
             if(part!=null){

@@ -261,7 +261,7 @@ public class UserController {
 
     //注销
     @AccessLimit(maxCount = 500,seconds = 5) //接口访问限流
-   // @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内
+    @DedupLimit(expireTime = 5000) //去除重复请求,5秒之内
     @PostMapping("/logout")
     public AjaxResult logout(HttpSession session){
         session.removeAttribute(AppVariable.USER_SESSION_KEY);
